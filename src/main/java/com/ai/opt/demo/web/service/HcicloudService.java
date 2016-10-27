@@ -6,7 +6,6 @@ import java.util.Date;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -55,7 +54,11 @@ public class HcicloudService {
         StringEntity  param =new StringEntity(text,  "UTF-8");// 构造请求数据
         post.setEntity(param);
         try {
+            long httpStart = System.currentTimeMillis();
+            LOGGER.info("开始httpClient,当前时间戳:{}",httpStart);
             response = client.execute(post);
+            long httpEnd = System.currentTimeMillis();
+            LOGGER.info("结束httpClient,当前时间戳:{},用时:{}",httpEnd,(httpEnd-httpStart));
             HttpEntity entity = response.getEntity();
             System.out.println(response.getStatusLine().getStatusCode());
             resStr = EntityUtils.toString(entity, "UTF-8");

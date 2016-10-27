@@ -1,5 +1,6 @@
 package com.ai.opt.demo.web.servlet;
 
+import com.ai.opt.demo.web.utils.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +36,20 @@ public class HcicloudServlet extends HttpServlet{
             
             long endTime = System.currentTimeMillis();
             LOGGER.info("结束执行语音合成,当前时间:{},用时:{}", endTime, (endTime - startTime));
-        }
+        }else
+            proxy(forNum);
     }
     
     /**
      * 代理模式
      */
     private void proxy(int forNum){
+        long startTime = System.currentTimeMillis();
+        LOGGER.info("HcicloudServlet.代理开始执行翻译,当前时间:{}", startTime);
+        for (int i = 0; i < forNum; i++) {
+            HttpUtil.doGet("http://123.56.4.39:8180/demo-web/yees?forNum=1");
+        }
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("HcicloudServlet.代理结束执行翻译,当前时间:{},用时:{}", endTime, (endTime - startTime));
     }
 }
