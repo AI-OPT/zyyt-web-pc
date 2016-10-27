@@ -19,7 +19,13 @@ repositories {
 }
 
 dependencies {
+
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.6.2'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6.2'
+
     compile "jstl:jstl:1.2"
+    compile "org.apache.httpcomponents:httpclient:4.5.2"
     providedCompile "javax.servlet:javax.servlet-api:3.1.0"
     providedCompile "javax.servlet.jsp:javax.servlet.jsp-api:2.3.1"
 
