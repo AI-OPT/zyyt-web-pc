@@ -47,7 +47,7 @@ public class HcicloudServlet extends HttpServlet{
         long startTime = System.currentTimeMillis();
         LOGGER.info("HcicloudServlet.代理开始执行翻译,当前时间:{}", startTime);
         for (int i = 0; i < forNum; i++) {
-            HttpUtil.doGet("http://123.56.4.39:8180/demo-web/yees?forNum=1");
+            HttpUtil.doGet("http://123.56.4.39:8180/demo-web/hclouts?forNum=1");
         }
         long endTime = System.currentTimeMillis();
         LOGGER.info("HcicloudServlet.代理结束执行翻译,当前时间:{},用时:{}", endTime, (endTime - startTime));
