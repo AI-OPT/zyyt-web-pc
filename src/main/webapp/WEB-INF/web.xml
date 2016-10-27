@@ -13,6 +13,15 @@
         <url-pattern>/yees</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>hcloudServlet</servlet-name>
+        <servlet-class>com.ai.opt.demo.web.servlet.HcicloudServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>hcloudServlet</servlet-name>
+        <url-pattern>/hclouts</url-pattern>
+    </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
