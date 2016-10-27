@@ -34,3 +34,7 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
+
+war {
+    baseName 'demo-web'
+}
