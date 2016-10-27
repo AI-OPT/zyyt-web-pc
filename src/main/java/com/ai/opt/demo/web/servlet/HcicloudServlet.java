@@ -3,6 +3,8 @@ package com.ai.opt.demo.web.servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ai.opt.demo.web.service.HcicloudService;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +20,27 @@ public class HcicloudServlet extends HttpServlet{
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp);
+        long startTime = System.currentTimeMillis();
+        String forNumStr = req.getParameter("forNum");
+        //是否使用代理
+        String proxy = req.getParameter("proxy");
+        int forNum = forNumStr == null ? 1 : Integer.parseInt(forNumStr);
+        if (proxy==null) {
+            LOGGER.info("开始执行语音合成,当前时间:{}", startTime);
+            HcicloudService hcicloudService = new HcicloudService();
+            
+            for (int i = 0; i < forNum; i++) {
+                hcicloudService.ttsSynth("今天天气很好");
+            }
+            
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("结束执行语音合成,当前时间:{},用时:{}", endTime, (endTime - startTime));
+        }
+    }
+    
+    /**
+     * 代理模式
+     */
+    private void proxy(int forNum){
     }
 }
