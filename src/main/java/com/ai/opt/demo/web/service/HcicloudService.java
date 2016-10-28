@@ -2,7 +2,10 @@ package com.ai.opt.demo.web.service;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -28,6 +31,8 @@ public class HcicloudService {
     private static String SENDURL = "http://test.api.hcicloud.com:8880/tts/SynthText";
     private static final String PROXY_URL = "http://123.56.4.39:8180/demo-web/hclouts?forNum=1";
     private static final Logger LOGGER = LoggerFactory.getLogger(HcicloudService.class);
+    public List<String> timeList = new ArrayList<>();
+    public List<String> proxyTime = new ArrayList<>();
     
     /**
      * 语音合成
@@ -36,7 +41,9 @@ public class HcicloudService {
      * @return
      * @author mimw
      */
-    public String ttsSynth(String text,HttpServletResponse resp) {
+    public String ttsSynth(String text,OutputStream os) {
+        long startTime = System.currentTimeMillis();
+        LOGGER.info("开始 ttsSynth,当前时间戳:{}",startTime);
         CloseableHttpClient client = HttpClients.createDefault();  
         HttpPost post = new HttpPost(SENDURL);
         CloseableHttpResponse response = null;
@@ -66,13 +73,17 @@ public class HcicloudService {
             long httpEnd = System.currentTimeMillis();
             LOGGER.info("结束httpClient,当前时间戳:{},用时:{}",httpEnd,(httpEnd-httpStart));
             HttpEntity entity = response.getEntity();
+            long contLen = entity.getContentLength();
+            LOGGER.info("entity length:{}",contLen);
+            entity.writeTo(os);
+
 //            ttsIn = entity.getContent();
 //            byte[] bytes = new byte[1024*1024];
 //            int byteCount;
 //            while ((byteCount=ttsIn.read(bytes))>-1)
 //                resp.getOutputStream().write(bytes,0,byteCount);
             //写入文件
-            intoFile(file,entity.getContent());
+//            intoFile(file,entity.getContent());
 //            System.out.println(response.getStatusLine().getStatusCode());
 //            resStr = EntityUtils.toString(entity, "UTF-8");
 //            LOGGER.info(resStr);
@@ -87,10 +98,15 @@ public class HcicloudService {
                 }
             }
         }
+        long endTime = System.currentTimeMillis();
+        long tim = endTime - startTime;
+        timeList.add(startTime+","+endTime+","+tim);
+        LOGGER.info("结束 ttsSynth,当前时间戳:{},用时:{}",endTime,tim);
         return resStr;
     }
 
     public void proxyTts(){
+        proxyTime.clear();
         long startTime = System.currentTimeMillis();
         LOGGER.info("开始 proxyTts,当前时间戳:{}",startTime);
         CloseableHttpClient client = HttpClients.createDefault();
@@ -126,7 +142,9 @@ public class HcicloudService {
             }
         }
         long endTime = System.currentTimeMillis();
-        LOGGER.info("开始 proxyTts,当前时间戳:{},用时:{}",endTime,(endTime-startTime));
+        long tim = endTime - startTime;
+        proxyTime.add(startTime+","+endTime+","+tim);
+        LOGGER.info("结束 proxyTts,当前时间戳:{},用时:{}",endTime,tim);
     }
 
     private void intoFile(File file,InputStream inputStream){

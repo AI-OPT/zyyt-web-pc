@@ -1,6 +1,7 @@
 package com.ai.opt.demo.web.servlet;
 
 import com.ai.opt.demo.web.utils.HttpUtil;
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 灵云demo
@@ -20,6 +23,7 @@ import java.io.InputStream;
  */
 public class HcicloudServlet extends HttpServlet{
     private static final Logger LOGGER = LoggerFactory.getLogger(HcicloudServlet.class);
+    private static List<String> timeList = new ArrayList<>();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -28,20 +32,35 @@ public class HcicloudServlet extends HttpServlet{
         //是否使用代理
         String proxy = req.getParameter("proxy");
         int forNum = forNumStr == null ? 1 : Integer.parseInt(forNumStr);
+        String text = "结束执行翻译,当前时间:1477561176545,用时:2706结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束执行翻译,当前时间:1477561176545," +
+                "用时:2706结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
+                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,";
         if (proxy==null) {
-            LOGGER.info("开始执行语音合成,当前时间:{}", startTime);
+            LOGGER.info("开始 执行语音合成,当前时间:{}", startTime);
             HcicloudService hcicloudService = new HcicloudService();
             resp.setCharacterEncoding("UTF-8");
             resp.setHeader("Content-type","text/html;charset=UTF-8");
-            hcicloudService.ttsSynth("今天天气很好"+startTime,resp);
-            FileInputStream fis = new FileInputStream(HcicloudService.file);
-            byte[] bytes = new byte[1024*1024];
-            int byteCount;
-            while ((byteCount=fis.read(bytes))>-1)
-                resp.getOutputStream().write(bytes,0,byteCount);
+            resp.getOutputStream();
+            hcicloudService.ttsSynth(text+startTime,resp.getOutputStream());
+//            FileInputStream fis = new FileInputStream(HcicloudService.file);
+//            byte[] bytes = new byte[1024*1024];
+//            int byteCount;
+//            while ((byteCount=fis.read(bytes))>-1)
+//                resp.getOutputStream().write(bytes,0,byteCount);
 
             long endTime = System.currentTimeMillis();
-            LOGGER.info("结束执行语音合成,当前时间:{},用时:{}", endTime, (endTime - startTime));
+            LOGGER.info("结束 执行语音合成,当前时间:{},用时:{}", endTime, (endTime - startTime));
+            LOGGER.info(JSON.toJSONString(hcicloudService.timeList));
         }else
             proxy(forNum);
     }
@@ -51,12 +70,13 @@ public class HcicloudServlet extends HttpServlet{
      */
     private void proxy(int forNum){
         long startTime = System.currentTimeMillis();
-        LOGGER.info("HcicloudServlet.代理开始执行翻译,当前时间:{}", startTime);
+        LOGGER.info("开始 HcicloudServlet.代理开始执行翻译,当前时间:{}", startTime);
         HcicloudService hcicloudService = new HcicloudService();
         for (int i = 0; i < forNum; i++) {
             hcicloudService.proxyTts();
         }
         long endTime = System.currentTimeMillis();
-        LOGGER.info("HcicloudServlet.代理结束执行翻译,当前时间:{},用时:{}", endTime, (endTime - startTime));
+        LOGGER.info("结束 HcicloudServlet.代理结束执行翻译,当前时间:{},用时:{}", endTime, (endTime - startTime));
+        LOGGER.info(JSON.toJSONString(hcicloudService.proxyTime));
     }
 }
