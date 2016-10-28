@@ -94,7 +94,7 @@ public class HcicloudService {
         long startTime = System.currentTimeMillis();
         LOGGER.info("开始 proxyTts,当前时间戳:{}",startTime);
         CloseableHttpClient client = HttpClients.createDefault();
-        HttpGet post = new HttpGet(PROXY_URL);
+        HttpGet post = new HttpGet(PROXY_URL+"&"+startTime);
         CloseableHttpResponse response = null;
         String resStr = "";
 

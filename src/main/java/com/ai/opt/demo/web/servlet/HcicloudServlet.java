@@ -33,7 +33,7 @@ public class HcicloudServlet extends HttpServlet{
             HcicloudService hcicloudService = new HcicloudService();
             resp.setCharacterEncoding("UTF-8");
             resp.setHeader("Content-type","text/html;charset=UTF-8");
-            hcicloudService.ttsSynth("今天天气很好",resp);
+            hcicloudService.ttsSynth("今天天气很好"+startTime,resp);
             FileInputStream fis = new FileInputStream(HcicloudService.file);
             byte[] bytes = new byte[1024*1024];
             int byteCount;
