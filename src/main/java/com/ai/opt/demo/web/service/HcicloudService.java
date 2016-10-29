@@ -58,7 +58,7 @@ public class HcicloudService {
         post.setHeader("x-app-key", APPKEY);
         post.setHeader("x-sdk-version", "3.6");
         post.setHeader("x-request-date", dateFormater.format(date));
-        post.setHeader("x-task-config", "capkey=tts.cloud.wangjing");
+        post.setHeader("x-task-config", "capkey=tts.cloud.wangjing,audioformat=mp3_16");
         post.setHeader("x-session-key", MD5Util.MD5(dataStr + DEVKEY ));
         post.setHeader("x-udid", "101:1234567890"); 
         
@@ -152,13 +152,38 @@ public class HcicloudService {
             if (!file.exists())
                 file.createNewFile();
             System.out.println(file.getAbsolutePath());
-            FileOutputStream fos = new FileOutputStream(file);
-            int byteCount = 0;
-            //1M逐个读取
-            byte[] bytes = new byte[1024*1024];
-            while ((byteCount = inputStream.read(bytes)) != -1){
-                fos.write(bytes, 0, byteCount);
+          
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+            InputStream input = inputStream;
+            byte[] buffer = new byte[1024*1024];  
+            int lens;  
+            while ((lens = input.read(buffer)) > -1 ) {  
+                baos.write(buffer, 0, lens);  
+            }  
+            baos.flush();  
+            
+            String resStr = new String(baos.toByteArray(), "utf-8");
+            String splitStr = "</ResponseInfo>";
+            String[] temp = resStr.split(splitStr);
+            String resXml = temp[0] + splitStr;
+            LOGGER.info(resXml);
+            
+            //xml byte长度
+            int offset = resXml.getBytes().length;
+
+            InputStream is = new ByteArrayInputStream(baos.toByteArray());
+            //丢掉xml内容
+            is.skip(offset);
+            FileOutputStream fos = new FileOutputStream(file.getAbsolutePath());
+
+            byte[] b = new byte[1024*1024];
+            int len = 0;
+            while((len = is.read(b)) != -1)
+            {
+                fos.write(b,0,len);
             }
+            is.close();
+            fos.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
