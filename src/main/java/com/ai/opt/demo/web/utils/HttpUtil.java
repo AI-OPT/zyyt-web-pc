@@ -61,6 +61,7 @@ public class HttpUtil {
     private static PoolingHttpClientConnectionManager connMgr;
     private static RequestConfig requestConfig;
     private static final int MAX_TIMEOUT = 7000;
+    public static List<String> HTTP_TIMES = new ArrayList<>();
 
     static {
         // 设置连接池
@@ -96,6 +97,8 @@ public class HttpUtil {
      * @return
      */
     public static String doGet(String url, Map<String, Object> params) {
+        long startTime = System.currentTimeMillis();
+        LOGGER.info("开始 doGet,当前时间戳:{}",startTime);
         String apiUrl = url;
         StringBuffer param = new StringBuffer();
         int i = 0;
@@ -112,11 +115,13 @@ public class HttpUtil {
         HttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpPost = new HttpGet(apiUrl);
+            long httpStart = System.currentTimeMillis();
+            LOGGER.info("开始 httpClient,当前时间戳:{}",httpStart);
             HttpResponse response = httpclient.execute(httpPost);
             int statusCode = response.getStatusLine().getStatusCode();
-
-            System.out.println("执行状态码 : " + statusCode);
-
+            LOGGER.info("执行状态码 : " + statusCode);
+            long httpEnd = System.currentTimeMillis();
+            LOGGER.info("结束 httpClient,当前时间戳:{},用时:{}",httpEnd,(httpEnd-httpStart));
             HttpEntity entity = response.getEntity();
             if (entity != null) {
                 InputStream instream = entity.getContent();
@@ -125,6 +130,10 @@ public class HttpUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        long endTime = System.currentTimeMillis();
+        long tim = endTime - startTime;
+        HTTP_TIMES.add(startTime+","+endTime+","+tim);
+        LOGGER.info("结束 proxyTts,当前时间戳:{},用时:{}",endTime,tim);
         return result;
     }
 
@@ -362,26 +371,4 @@ public class HttpUtil {
     }
 
 
-    /**
-     * 测试方法
-     * @param args
-     */
-    public static void main(String[] args) throws Exception {
-        Map<String,Object> postParams = new HashMap<>();
-        postParams.put("from","zh");//源语言
-        postParams.put("to","en");//目标语言
-        postParams.put("app_kid", YeekitService.APP_KID);//授权APP ID
-        postParams.put("app_key",YeekitService.APP_KEY);//授权APP KEY
-        postParams.put("text", URLEncoder.encode("我","UTF-8"));//待翻译文本,UTF-8编码
-        String resultStr = HttpUtil.doPost(YeekitService.SERVER_URL,postParams);
-        JSONObject translated0 = JSON.parseObject(resultStr)
-                .getJSONArray("translation").getJSONObject(0).getJSONArray("translated").getJSONObject(0);
-        String srcTokenized = translated0.getString("src-tokenized").replaceAll("\\s*", "");
-        String score = translated0.getString("score");
-        int rank = translated0.getIntValue("rank");
-        String text = translated0.getString("text").replaceAll("\\s*", "");
-        System.out.println(resultStr);
-        System.out.println("srcTokenized="+ URLDecoder.decode(srcTokenized,"UTF-8"));
-        System.out.println("text="+URLDecoder.decode(text,"UTF-8"));
-    }
 }
