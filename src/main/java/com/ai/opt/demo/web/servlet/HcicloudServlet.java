@@ -31,6 +31,8 @@ public class HcicloudServlet extends HttpServlet{
         String forNumStr = req.getParameter("forNum");
         //是否使用代理
         String proxy = req.getParameter("proxy");
+        //是否写入文件
+        String toFile = req.getParameter("toFile");
         int forNum = forNumStr == null ? 1 : Integer.parseInt(forNumStr);
         String text = "结束执行翻译,当前时间:1477561176545,用时:2706结束httpClient,当前时间戳:1477561176022," +
                 "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
@@ -39,30 +41,36 @@ public class HcicloudServlet extends HttpServlet{
                 "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
                 "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
                 "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
-                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束执行翻译,当前时间:1477561176545," +
-                "用时:2706结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
-                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
-                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
-                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
-                "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,";
-        if (proxy==null) {
+                "用时:495结束httpClient,当前时间戳,用时:495结束httpClient,";
+        //代理模式
+        if (proxy!=null){
+            proxy(forNum);
+        }//写入文件
+        else if (toFile!=null){
+            HcicloudService.TIME_LIST.clear();
+            LOGGER.info("开始[文本] 执行语音合成,当前时间:{}", startTime);
+            HcicloudService hcicloudService = new HcicloudService();
+            resp.setCharacterEncoding("UTF-8");
+            resp.setHeader("Content-type","text/html;charset=UTF-8");
+            for (int i=0;i<forNum;i++) {
+                hcicloudService.ttsSynth(text + System.currentTimeMillis(), true);
+            }
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("结束[文本] 执行语音合成,当前时间:{},用时:{}", endTime, (endTime - startTime));
+            LOGGER.info(JSON.toJSONString(hcicloudService.TIME_LIST,true));
+        }//直接返回模式
+        else{
             LOGGER.info("开始 执行语音合成,当前时间:{}", startTime);
             HcicloudService hcicloudService = new HcicloudService();
             resp.setCharacterEncoding("UTF-8");
             resp.setHeader("Content-type","text/html;charset=UTF-8");
             resp.getOutputStream();
-            hcicloudService.ttsSynth(text+startTime,resp.getOutputStream());
-//            FileInputStream fis = new FileInputStream(HcicloudService.file);
-//            byte[] bytes = new byte[1024*1024];
-//            int byteCount;
-//            while ((byteCount=fis.read(bytes))>-1)
-//                resp.getOutputStream().write(bytes,0,byteCount);
-
+            byte[] ttsBytes = hcicloudService.ttsSynth(text+startTime,false);
+            resp.getOutputStream().write(ttsBytes);
             long endTime = System.currentTimeMillis();
             LOGGER.info("结束 执行语音合成,当前时间:{},用时:{}", endTime, (endTime - startTime));
-            LOGGER.info(JSON.toJSONString(hcicloudService.timeList));
-        }else
-            proxy(forNum);
+            LOGGER.info(JSON.toJSONString(hcicloudService.TIME_LIST,true));
+        }
     }
     
     /**
@@ -72,11 +80,12 @@ public class HcicloudServlet extends HttpServlet{
         long startTime = System.currentTimeMillis();
         LOGGER.info("开始 HcicloudServlet.代理开始执行翻译,当前时间:{}", startTime);
         HcicloudService hcicloudService = new HcicloudService();
+        hcicloudService.proxyTime.clear();
         for (int i = 0; i < forNum; i++) {
             hcicloudService.proxyTts();
         }
         long endTime = System.currentTimeMillis();
         LOGGER.info("结束 HcicloudServlet.代理结束执行翻译,当前时间:{},用时:{}", endTime, (endTime - startTime));
-        LOGGER.info(JSON.toJSONString(hcicloudService.proxyTime));
+        LOGGER.info(JSON.toJSONString(hcicloudService.proxyTime,true));
     }
 }

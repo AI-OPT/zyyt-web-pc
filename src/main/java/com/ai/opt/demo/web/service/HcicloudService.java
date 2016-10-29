@@ -29,11 +29,11 @@ public class HcicloudService {
     private static String APPKEY = "ad5d5421";
     private static String DEVKEY = "bca4b0015b309b76301bb10efdf90561";
     private static String SENDURL = "http://test.api.hcicloud.com:8880/tts/SynthText";
-    private static final String PROXY_URL = "http://123.56.4.39:8180/demo-web/hclouts?forNum=1";
+    private static final String PROXY_URL = "http://172.17.0.1:8180/demo-web/hclouts?forNum=1";
     private static final Logger LOGGER = LoggerFactory.getLogger(HcicloudService.class);
-    public List<String> timeList = new ArrayList<>();
+    public static List<String> TIME_LIST = new ArrayList<>();
     public List<String> proxyTime = new ArrayList<>();
-    
+
     /**
      * 语音合成
      * 
@@ -41,15 +41,13 @@ public class HcicloudService {
      * @return
      * @author mimw
      */
-    public String ttsSynth(String text,OutputStream os) {
+    public byte[] ttsSynth(String text,boolean toFile) {
         long startTime = System.currentTimeMillis();
         LOGGER.info("开始 ttsSynth,当前时间戳:{}",startTime);
         CloseableHttpClient client = HttpClients.createDefault();  
         HttpPost post = new HttpPost(SENDURL);
         CloseableHttpResponse response = null;
-        String resStr = "";
-        InputStream ttsIn = null;
-        
+
         SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date=new Date();
         String dataStr = dateFormater.format(date);
@@ -66,6 +64,7 @@ public class HcicloudService {
         
         StringEntity  param =new StringEntity(text,  "UTF-8");// 构造请求数据
         post.setEntity(param);
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         try {
             long httpStart = System.currentTimeMillis();
             LOGGER.info("开始httpClient,当前时间戳:{}",httpStart);
@@ -73,18 +72,24 @@ public class HcicloudService {
             long httpEnd = System.currentTimeMillis();
             LOGGER.info("结束httpClient,当前时间戳:{},用时:{}",httpEnd,(httpEnd-httpStart));
             HttpEntity entity = response.getEntity();
-            long contLen = entity.getContentLength();
-            LOGGER.info("entity length:{}",contLen);
-            entity.writeTo(os);
+            InputStream ttsIn = entity.getContent();
 
-//            ttsIn = entity.getContent();
-//            byte[] bytes = new byte[1024*1024];
-//            int byteCount;
-//            while ((byteCount=ttsIn.read(bytes))>-1)
-//                resp.getOutputStream().write(bytes,0,byteCount);
-            //写入文件
-//            intoFile(file,entity.getContent());
-//            System.out.println(response.getStatusLine().getStatusCode());
+            if (toFile){
+                //写入文件
+                intoFile(file,entity.getContent());
+                LOGGER.info(response.getStatusLine().getStatusCode()+"");
+            }else {
+                //写入缓存
+                int nRead = 0;
+                byte[] data = new byte[8092];
+                while ((nRead = ttsIn.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, nRead);
+                }
+                buffer.flush();
+                LOGGER.info("entity inputStream len:{}", buffer.size());
+            }
+
+            //转换为字符串
 //            resStr = EntityUtils.toString(entity, "UTF-8");
 //            LOGGER.info(resStr);
         } catch (IOException e) {
@@ -100,13 +105,12 @@ public class HcicloudService {
         }
         long endTime = System.currentTimeMillis();
         long tim = endTime - startTime;
-        timeList.add(startTime+","+endTime+","+tim);
+        TIME_LIST.add(startTime+","+endTime+","+tim);
         LOGGER.info("结束 ttsSynth,当前时间戳:{},用时:{}",endTime,tim);
-        return resStr;
+        return buffer.toByteArray();
     }
 
     public void proxyTts(){
-        proxyTime.clear();
         long startTime = System.currentTimeMillis();
         LOGGER.info("开始 proxyTts,当前时间戳:{}",startTime);
         CloseableHttpClient client = HttpClients.createDefault();
@@ -151,7 +155,7 @@ public class HcicloudService {
         try {
             if (!file.exists())
                 file.createNewFile();
-            System.out.println(file.getAbsolutePath());
+            LOGGER.info(file.getAbsolutePath());
           
             ByteArrayOutputStream baos = new ByteArrayOutputStream();  
             InputStream input = inputStream;
@@ -163,17 +167,13 @@ public class HcicloudService {
             baos.flush();  
             
             String resStr = new String(baos.toByteArray(), "utf-8");
-            String splitStr = "</ResponseInfo>";
-            String[] temp = resStr.split(splitStr);
-            String resXml = temp[0] + splitStr;
-            LOGGER.info(resXml);
+            //获取xml内容
+            int indx = resStr.indexOf("</ResponseInfo>")+15;
+            LOGGER.info(resStr.substring(0,indx));
             
-            //xml byte长度
-            int offset = resXml.getBytes().length;
-
             InputStream is = new ByteArrayInputStream(baos.toByteArray());
             //丢掉xml内容
-            is.skip(offset);
+            is.skip(indx);
             FileOutputStream fos = new FileOutputStream(file.getAbsolutePath());
 
             byte[] b = new byte[1024*1024];

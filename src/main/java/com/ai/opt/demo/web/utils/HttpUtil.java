@@ -68,6 +68,7 @@ public class HttpUtil {
         // 设置连接池大小
         connMgr.setMaxTotal(10);
         connMgr.setDefaultMaxPerRoute(connMgr.getMaxTotal());
+        connMgr.setValidateAfterInactivity(2000);//ms
 
         RequestConfig.Builder configBuilder = RequestConfig.custom();
         // 设置连接超时
@@ -76,8 +77,6 @@ public class HttpUtil {
         configBuilder.setSocketTimeout(MAX_TIMEOUT);
         // 设置从连接池获取连接实例的超时
         configBuilder.setConnectionRequestTimeout(MAX_TIMEOUT);
-        // 在提交请求之前 测试连接是否可用
-        configBuilder.setStaleConnectionCheckEnabled(true);
         requestConfig = configBuilder.build();
     }
 
@@ -110,7 +109,7 @@ public class HttpUtil {
         }
         apiUrl += param;
         String result = null;
-        HttpClient httpclient = new DefaultHttpClient();
+        HttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpPost = new HttpGet(apiUrl);
             HttpResponse response = httpclient.execute(httpPost);
@@ -234,7 +233,10 @@ public class HttpUtil {
      * @return
      */
     public static String doPostSSL(String apiUrl, Map<String, Object> params) {
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(createSSLConnSocketFactory()).setConnectionManager(connMgr).setDefaultRequestConfig(requestConfig).build();
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setSSLSocketFactory(createSSLConnSocketFactory())
+                .setConnectionManager(connMgr)
+                .setDefaultRequestConfig(requestConfig).build();
         HttpPost httpPost = new HttpPost(apiUrl);
         CloseableHttpResponse response = null;
         String httpStr = null;
@@ -274,12 +276,18 @@ public class HttpUtil {
 
     /**
      * 发送 SSL POST 请求（HTTPS），JSON形式
-     * @param apiUrl API接口URL
-     * @param json JSON对象
+     * 
+     * @param apiUrl
+     *            API接口URL
+     * @param json
+     *            JSON对象
      * @return
      */
     public static String doPostSSL(String apiUrl, Object json) {
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(createSSLConnSocketFactory()).setConnectionManager(connMgr).setDefaultRequestConfig(requestConfig).build();
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setSSLSocketFactory(createSSLConnSocketFactory())
+                .setConnectionManager(connMgr)
+                .setDefaultRequestConfig(requestConfig).build();
         HttpPost httpPost = new HttpPost(apiUrl);
         CloseableHttpResponse response = null;
         String httpStr = null;
