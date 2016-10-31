@@ -27,6 +27,7 @@ import java.util.Map;
  */
 public class YeekitService {
     private static final Logger LOGGER = LoggerFactory.getLogger(YeekitService.class);
+    private static String NGINX_SER = "http://172.17.0.1:8180/demo-web/proxy/yeekit";
     private static final String SERVER_URL = "http://api.yeekit.com/dotranslate.php";
     private static final String APP_KID = "58105e00cabc3";
     private static final String APP_KEY = "53eeb0bb6c1b613ab361a4f8057b2bd9";
@@ -71,18 +72,18 @@ public class YeekitService {
      * 进行中译英翻译,
      * @param text 要翻译中文信息,UTF-8编码
      */
-    public Map<String,String> dotranslateZhToEn(String text) {
-        return getDotrans("zh","en",text);
+    public Map<String,String> dotranslateZhToEn(String text,boolean nProxy) {
+        return getDotrans("zh","en",text,nProxy);
     }
     /**
      * 进行中译英翻译,
      * @param text 要翻译中文信息,UTF-8编码
      */
-    public Map<String,String> dotranslateEnToZh(String text) {
-        return getDotrans("en","zh",text);
+    public Map<String,String> dotranslateEnToZh(String text,boolean nProxy) {
+        return getDotrans("en","zh",text,nProxy);
     }
 
-    private Map<String,String> getDotrans(String from,String to,String text) {
+    private Map<String,String> getDotrans(String from,String to,String text,boolean nProxy) {
         long startTime = System.currentTimeMillis();
         LOGGER.info("开始 getDotrans,当前时间戳:{}",startTime);
         Map<String,String> result = new HashMap<>();
@@ -93,7 +94,7 @@ public class YeekitService {
             postParams.put("app_kid",APP_KID);//授权APP ID
             postParams.put("app_key",APP_KEY);//授权APP KEY
             postParams.put("text", URLEncoder.encode(text,"UTF-8"));//待翻译文本,UTF-8编码
-            String resultStr = HttpUtil.doPost(SERVER_URL,postParams);
+            String resultStr = HttpUtil.doPost(nProxy?NGINX_SER:SERVER_URL,postParams);
             JSONArray translateds = JSON.parseObject(resultStr)
                     .getJSONArray("translation")
                     .getJSONObject(0).getJSONArray("translated");
@@ -102,6 +103,7 @@ public class YeekitService {
                 JSONObject jsonObject = translateds.getJSONObject(i);
                 sb.append(jsonObject.getString("text"));
             }
+            LOGGER.info("response:\r\n"+sb.toString());
             result.put("text",sb.toString());
         } catch (IOException e) {
             e.printStackTrace();

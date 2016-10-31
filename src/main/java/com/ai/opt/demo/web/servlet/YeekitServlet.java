@@ -27,6 +27,8 @@ public class YeekitServlet extends HttpServlet {
         String proxy = req.getParameter("proxy");
         //是否写入文件
         String toFile = req.getParameter("toFile");
+        //nginx代理模式
+        String nProxyg = req.getParameter("nproxy");
         String dotransStr = "The Hyper-Text Transfer Protocol (HTTP) is perhaps the most significant protocol " +
                 "used on the Internet today. Web services, network-enabled appliances and the growth of network " +
                 "computing continue to expand the role of the HTTP protocol beyond user-driven web browsers, " +
@@ -41,6 +43,7 @@ public class YeekitServlet extends HttpServlet {
         int forNum = forNumStr == null ? 1 : Integer.parseInt(forNumStr);
         resp.setCharacterEncoding("UTF-8");
         resp.setHeader("Content-type","text/html;charset=UTF-8");
+        LOGGER.info("The params:forNum={},proxy={},toFile={},nproxy{}",forNum,proxy,toFile,nProxyg);
         //代理
         if (proxy!=null) {
             proxy(forNum);
@@ -50,7 +53,7 @@ public class YeekitServlet extends HttpServlet {
             YeekitService yeekitService = new YeekitService();
             yeekitService.TIME_LIST.clear();
             for (int i=0;i<forNum;i++) {
-                yeekitService.dotranslateEnToZh(dotransStr+System.currentTimeMillis());
+                yeekitService.dotranslateEnToZh(dotransStr+System.currentTimeMillis(),nProxyg!=null);
             }
             long endTime = System.currentTimeMillis();
             LOGGER.info("结束[本地] 执行翻译,当前时间:{},用时:{}", endTime, (endTime - startTime));
@@ -59,11 +62,12 @@ public class YeekitServlet extends HttpServlet {
         else{
             LOGGER.info("开始 执行翻译,当前时间:{}", startTime);
             YeekitService yeekitService = new YeekitService();
-            Map<String,String> retMap =yeekitService.dotranslateEnToZh(dotransStr+System.currentTimeMillis());
+            Map<String,String> retMap =yeekitService.dotranslateEnToZh(dotransStr+System.currentTimeMillis(),false);
             resp.getWriter().write(retMap.get("text"));
             long endTime = System.currentTimeMillis();
             LOGGER.info("结束 执行翻译,当前时间:{},用时:{}", endTime, (endTime - startTime));
         }
+        LOGGER.info("The params:forNum={},proxy={},toFile={},nproxy{}",forNum,proxy,toFile,nProxyg);
     }
 
     /**

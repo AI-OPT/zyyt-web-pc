@@ -29,6 +29,7 @@ public class HcicloudService {
     private static String APPKEY = "ad5d5421";
     private static String DEVKEY = "bca4b0015b309b76301bb10efdf90561";
     private static String SENDURL = "http://test.api.hcicloud.com:8880/tts/SynthText";
+    private static String NGINX_SER = "http://172.17.0.1:8180/demo-web/proxy/hcicloud";
     private static final String PROXY_URL = "http://172.17.0.1:8180/demo-web/hclouts?forNum=1";
     private static final Logger LOGGER = LoggerFactory.getLogger(HcicloudService.class);
     public static List<String> TIME_LIST = new ArrayList<>();
@@ -41,11 +42,11 @@ public class HcicloudService {
      * @return
      * @author mimw
      */
-    public byte[] ttsSynth(String text,boolean toFile) {
+    public byte[] ttsSynth(String text,boolean toFile,boolean nProxy) {
         long startTime = System.currentTimeMillis();
         LOGGER.info("开始 ttsSynth,当前时间戳:{}",startTime);
         CloseableHttpClient client = HttpClients.createDefault();  
-        HttpPost post = new HttpPost(SENDURL);
+        HttpPost post = new HttpPost(nProxy?NGINX_SER:SENDURL);
         CloseableHttpResponse response = null;
 
         SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

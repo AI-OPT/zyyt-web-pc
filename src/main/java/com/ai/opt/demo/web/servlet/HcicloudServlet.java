@@ -33,6 +33,8 @@ public class HcicloudServlet extends HttpServlet{
         String proxy = req.getParameter("proxy");
         //是否写入文件
         String toFile = req.getParameter("toFile");
+        //nginx代理模式
+        String nProxyg = req.getParameter("nproxy");
         int forNum = forNumStr == null ? 1 : Integer.parseInt(forNumStr);
         String text = "结束执行翻译,当前时间:1477561176545,用时:2706结束httpClient,当前时间戳:1477561176022," +
                 "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
@@ -45,6 +47,7 @@ public class HcicloudServlet extends HttpServlet{
         //代理模式
         resp.setCharacterEncoding("UTF-8");
         resp.setHeader("Content-type","text/html;charset=UTF-8");
+        LOGGER.info("The params:forNum={},proxy={},toFile={},nproxy{}",forNum,proxy,toFile,nProxyg);
         if (proxy!=null){
             proxy(forNum);
         }//写入文件
@@ -53,7 +56,7 @@ public class HcicloudServlet extends HttpServlet{
             LOGGER.info("开始[文本] 执行语音合成,当前时间:{}", startTime);
             HcicloudService hcicloudService = new HcicloudService();
             for (int i=0;i<forNum;i++) {
-                hcicloudService.ttsSynth(text + System.currentTimeMillis(), true);
+                hcicloudService.ttsSynth(text + System.currentTimeMillis(), true,nProxyg!=null);
             }
             long endTime = System.currentTimeMillis();
             LOGGER.info("结束[文本] 执行语音合成,当前时间:{},用时:{}", endTime, (endTime - startTime));
@@ -62,12 +65,13 @@ public class HcicloudServlet extends HttpServlet{
         else{
             LOGGER.info("开始 执行语音合成,当前时间:{}", startTime);
             HcicloudService hcicloudService = new HcicloudService();
-            byte[] ttsBytes = hcicloudService.ttsSynth(text+startTime,false);
+            byte[] ttsBytes = hcicloudService.ttsSynth(text+startTime,false,false);
             resp.getOutputStream().write(ttsBytes);
             long endTime = System.currentTimeMillis();
             LOGGER.info("结束 执行语音合成,当前时间:{},用时:{}", endTime, (endTime - startTime));
             LOGGER.info(JSON.toJSONString(hcicloudService.TIME_LIST,true));
         }
+        LOGGER.info("The params:forNum={},proxy={},toFile={},nproxy{}",forNum,proxy,toFile,nProxyg);
     }
     
     /**
