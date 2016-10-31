@@ -43,6 +43,8 @@ public class HcicloudServlet extends HttpServlet{
                 "用时:495结束httpClient,当前时间戳:1477561176022,用时:495结束httpClient,当前时间戳:1477561176022," +
                 "用时:495结束httpClient,当前时间戳,用时:495结束httpClient,";
         //代理模式
+        resp.setCharacterEncoding("UTF-8");
+        resp.setHeader("Content-type","text/html;charset=UTF-8");
         if (proxy!=null){
             proxy(forNum);
         }//写入文件
@@ -50,8 +52,6 @@ public class HcicloudServlet extends HttpServlet{
             HcicloudService.TIME_LIST.clear();
             LOGGER.info("开始[文本] 执行语音合成,当前时间:{}", startTime);
             HcicloudService hcicloudService = new HcicloudService();
-            resp.setCharacterEncoding("UTF-8");
-            resp.setHeader("Content-type","text/html;charset=UTF-8");
             for (int i=0;i<forNum;i++) {
                 hcicloudService.ttsSynth(text + System.currentTimeMillis(), true);
             }
@@ -62,9 +62,6 @@ public class HcicloudServlet extends HttpServlet{
         else{
             LOGGER.info("开始 执行语音合成,当前时间:{}", startTime);
             HcicloudService hcicloudService = new HcicloudService();
-            resp.setCharacterEncoding("UTF-8");
-            resp.setHeader("Content-type","text/html;charset=UTF-8");
-            resp.getOutputStream();
             byte[] ttsBytes = hcicloudService.ttsSynth(text+startTime,false);
             resp.getOutputStream().write(ttsBytes);
             long endTime = System.currentTimeMillis();

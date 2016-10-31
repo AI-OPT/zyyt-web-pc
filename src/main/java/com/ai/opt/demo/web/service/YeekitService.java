@@ -3,6 +3,7 @@ package com.ai.opt.demo.web.service;
 import com.ai.opt.demo.web.exception.HttpStatusException;
 import com.ai.opt.demo.web.utils.HttpUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -62,6 +63,7 @@ public class YeekitService {
         long tim = endTime - startTime;
         proxyTime.add(startTime+","+endTime+","+tim);
         LOGGER.info("结束 proxyTts,当前时间戳:{},用时:{}",endTime,tim);
+        LOGGER.info("result str \r\n"+result);
         return result;
     }
 
@@ -92,12 +94,15 @@ public class YeekitService {
             postParams.put("app_key",APP_KEY);//授权APP KEY
             postParams.put("text", URLEncoder.encode(text,"UTF-8"));//待翻译文本,UTF-8编码
             String resultStr = HttpUtil.doPost(SERVER_URL,postParams);
-            JSONObject translated0 = JSON.parseObject(resultStr)
+            JSONArray translateds = JSON.parseObject(resultStr)
                     .getJSONArray("translation")
-                    .getJSONObject(0).getJSONArray("translated").getJSONObject(0);
-
-            result.put("srcTokenized",translated0.getString("src-tokenized").replaceAll("\\s*", ""));
-            result.put("text",translated0.getString("text").replaceAll("\\s*", ""));
+                    .getJSONObject(0).getJSONArray("translated");
+            StringBuffer sb = new StringBuffer();
+            for (int i=0;i<translateds.size();i++) {
+                JSONObject jsonObject = translateds.getJSONObject(i);
+                sb.append(jsonObject.getString("text"));
+            }
+            result.put("text",sb.toString());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (HttpStatusException e) {

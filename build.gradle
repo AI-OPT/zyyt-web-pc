@@ -15,7 +15,8 @@ configurations.all {
 }
 
 repositories {
-    maven { url "http://10.1.228.199:18081/nexus/content/groups/public" }
+//    maven { url "http://10.1.228.199:18081/nexus/content/groups/public" }
+    mavenCentral()
 }
 
 dependencies {
@@ -30,7 +31,6 @@ dependencies {
     compile "org.apache.httpcomponents:httpclient:4.5.2"
     providedCompile "javax.servlet:javax.servlet-api:3.1.0"
     providedCompile "javax.servlet.jsp:javax.servlet.jsp-api:2.3.1"
-    compile "jstl:jstl:1.2"
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
